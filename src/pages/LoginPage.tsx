@@ -59,11 +59,6 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold mb-2">Welcome back</h1>
           <p className="text-gray-500 text-sm mb-7">Sign in to your account to continue.</p>
 
-          {/* Demo hint */}
-          <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 mb-5 text-xs text-blue-700">
-            <strong>Demo:</strong> Use any email + any password (6+ chars). Try <span className="font-mono">rahul@email.com</span> to load a saved customer.
-          </div>
-
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
