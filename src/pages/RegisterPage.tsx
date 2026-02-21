@@ -4,6 +4,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/context/AuthContext'
+import { api } from '@/lib/apiClient'
 
 interface RegisterForm {
   name: string
@@ -19,15 +20,30 @@ export default function RegisterPage() {
   const [showPwd, setShowPwd] = useState(false)
   const navigate = useNavigate()
   const pwd = watch('password')
-  const { login } = useAuth()
+  const { setSession } = useAuth()
 
-  function onSubmit(data: RegisterForm) {
-    return new Promise<void>(resolve => setTimeout(() => {
-      login({ name: data.name, email: data.email, phone: data.phone })
-      toast.success(`Account created! Welcome, ${data.name.split(' ')[0]}!`)
+  async function onSubmit(data: RegisterForm) {
+    try {
+      const res = await api.post<{ token: string; user: { id: number; name: string; email: string; phone: string | null; role?: 'user' | 'admin' } }>(
+        '/api/auth/register',
+        { name: data.name, email: data.email, phone: data.phone, password: data.password },
+      )
+      setSession({
+        token: res.token,
+        user: {
+          id: String(res.user.id),
+          name: res.user.name,
+          email: res.user.email,
+          phone: res.user.phone ?? data.phone,
+          role: res.user.role,
+        },
+      })
+      toast.success(`Account created! Welcome, ${res.user.name.split(' ')[0]}!`)
       navigate('/', { replace: true })
-      resolve()
-    }, 800))
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to create account')
+      throw e
+    }
   }
 
   return (

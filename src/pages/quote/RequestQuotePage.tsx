@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { FileText, CheckCircle, Phone, Mail } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useState } from 'react'
+import { api } from '@/lib/apiClient'
 
 const TRADES = [
   'Electronics', "Men's Garments", "Women's Garments", 'Kitchen Cookware',
@@ -22,14 +23,26 @@ export default function RequestQuotePage() {
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<QuoteRequest>()
   const [submitted, setSubmitted] = useState(false)
 
-  function onSubmit(_data: QuoteRequest) {
-    // Simulate API call
-    return new Promise<void>(resolve => setTimeout(() => {
+  async function onSubmit(data: QuoteRequest) {
+    try {
+      await api.post('/api/quotes', {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        company: data.company,
+        trade: data.trade,
+        products: data.products,
+        quantity: data.quantity,
+        deliveryLocation: data.deliveryLocation,
+        notes: data.notes,
+      })
       toast.success('Quote request submitted! We will contact you within 4 hours.')
       setSubmitted(true)
       reset()
-      resolve()
-    }, 1200))
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to submit quote')
+      throw e
+    }
   }
 
   return (

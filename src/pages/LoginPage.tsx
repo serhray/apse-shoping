@@ -4,7 +4,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/context/AuthContext'
-import { MOCK_CUSTOMERS } from '@/lib/adminStore'
+import { api } from '@/lib/apiClient'
 
 interface LoginForm { email: string; password: string }
 
@@ -13,25 +13,33 @@ export default function LoginPage() {
   const [showPwd, setShowPwd] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-  const { login } = useAuth()
+  const { setSession, logout } = useAuth()
 
   const from = (location.state as { from?: string })?.from ?? '/'
 
-  function onSubmit(data: LoginForm) {
-    return new Promise<void>((resolve, reject) => setTimeout(() => {
-      // Demo: any password works; we look up the customer by email for the name
-      if (!data.email.includes('@')) {
-        toast.error('Invalid email address.')
-        return reject()
-      }
-      const found = MOCK_CUSTOMERS.find(c => c.email === data.email)
-      const name = found?.name ?? data.email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-      const phone = found?.phone ?? ''
-      login({ name, email: data.email, phone })
-      toast.success(`Welcome back, ${name.split(' ')[0]}!`)
+  async function onSubmit(data: LoginForm) {
+    logout()
+    try {
+      const res = await api.post<{ token: string; user: { id: number; name: string; email: string; phone: string | null; role?: 'user' | 'admin' } }>(
+        '/api/auth/login',
+        { email: data.email, password: data.password },
+      )
+      setSession({
+        token: res.token,
+        user: {
+          id: String(res.user.id),
+          name: res.user.name,
+          email: res.user.email,
+          phone: res.user.phone ?? '',
+          role: res.user.role,
+        },
+      })
+      toast.success(`Welcome back, ${res.user.name.split(' ')[0]}!`)
       navigate(from, { replace: true })
-      resolve()
-    }, 800))
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to sign in')
+      return
+    }
   }
 
   return (

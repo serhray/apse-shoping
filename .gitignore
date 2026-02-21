@@ -18,6 +18,7 @@ yarn-error.log*
 
 # misc
 .DS_Store
+tsconfig.tsbuildinfo
 
 # local editor settings
 .vscode/

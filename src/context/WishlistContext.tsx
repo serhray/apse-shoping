@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
 import type { Product } from '@/types'
+import { api } from '@/lib/apiClient'
+import { useAuth } from '@/context/AuthContext'
 
 // ─── State ───────────────────────────────────────────────────────────────────
 
@@ -57,17 +59,54 @@ function loadFromStorage(): WishlistState {
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(wishlistReducer, undefined, loadFromStorage)
+  const { token, isLoggedIn } = useAuth()
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   }, [state])
 
+  useEffect(() => {
+    let alive = true
+    if (!isLoggedIn || !token) return
+    api.get<Product[]>('/api/wishlist', token)
+      .then(list => {
+        if (!alive) return
+        if (Array.isArray(list)) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ items: list }))
+          dispatch({ type: 'CLEAR' })
+          for (const p of list) {
+            dispatch({ type: 'TOGGLE', payload: p })
+          }
+        }
+      })
+      .catch(() => {
+      })
+    return () => { alive = false }
+  }, [isLoggedIn, token])
+
   const value: WishlistContextValue = {
     ...state,
     count: state.items.length,
-    toggle: (product) => dispatch({ type: 'TOGGLE', payload: product }),
-    remove: (id) => dispatch({ type: 'REMOVE', payload: id }),
-    clearWishlist: () => dispatch({ type: 'CLEAR' }),
+    toggle: (product) => {
+      const exists = state.items.some(i => i.id === product.id)
+      dispatch({ type: 'TOGGLE', payload: product })
+      if (isLoggedIn && token) {
+        if (exists) {
+          api.delete(`/api/wishlist/${product.id}`, token).catch(() => {})
+        } else {
+          api.post('/api/wishlist', { productId: product.id }, token).catch(() => {})
+        }
+      }
+    },
+    remove: (id) => {
+      dispatch({ type: 'REMOVE', payload: id })
+      if (isLoggedIn && token) {
+        api.delete(`/api/wishlist/${id}`, token).catch(() => {})
+      }
+    },
+    clearWishlist: () => {
+      dispatch({ type: 'CLEAR' })
+    },
     isWished: (id) => state.items.some(i => i.id === id),
   }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { getProducts } from '@/lib/adminStore'
 import type { Product } from '@/types'
+import { api } from '@/lib/apiClient'
 
 /**
  * Reactive hook that reads products from localStorage (admin-managed).
@@ -8,12 +8,18 @@ import type { Product } from '@/types'
  * Re-renders automatically when admin saves product changes.
  */
 export function useProducts(): Product[] {
-  const [products, setProducts] = useState<Product[]>(getProducts)
+  const [products, setProducts] = useState<Product[]>([])
 
   useEffect(() => {
-    const handler = () => setProducts(getProducts())
-    window.addEventListener('apse:products', handler)
-    return () => window.removeEventListener('apse:products', handler)
+    let alive = true
+    api.get<Product[]>('/api/products')
+      .then(list => {
+        if (alive) setProducts(Array.isArray(list) ? list : [])
+      })
+      .catch(() => {
+        if (alive) setProducts([])
+      })
+    return () => { alive = false }
   }, [])
 
   return products
