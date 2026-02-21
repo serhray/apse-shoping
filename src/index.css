@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    @apply font-sans text-gray-800 bg-white;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { @apply transition-colors duration-200; }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-5 py-2.5 rounded font-semibold text-sm transition-all duration-200 cursor-pointer;
+  }
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-dark;
+  }
+  .btn-outline {
+    @apply btn border border-primary text-primary hover:bg-primary hover:text-white;
+  }
+  .btn-secondary {
+    @apply btn bg-secondary text-white hover:bg-secondary-dark;
+  }
+  .section-title {
+    @apply text-2xl font-bold text-gray-900 tracking-tight uppercase;
+  }
+  .section-title-bar {
+    @apply inline-block w-10 h-1 bg-accent mr-2 align-middle;
+  }
+  .product-card {
+    @apply bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden;
+  }
+  .price-new {
+    @apply text-accent font-bold text-lg;
+  }
+  .price-old {
+    @apply text-gray-400 line-through text-sm mr-2;
+  }
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-bold;
+  }
+  /* Form utility classes (used in admin + checkout forms) */
+  .input {
+    @apply border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-shadow;
+  }
+  .label {
+    @apply block text-sm font-semibold text-gray-700 mb-1;
+  }
+}
+
+/* Swiper overrides */
+.swiper-button-next,
+.swiper-button-prev {
+  @apply text-white bg-black/40 rounded-full p-1 w-10 h-10;
+}
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  @apply bg-primary;
+}
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 16px !important;
+}
+.swiper-pagination-bullet-active {
+  @apply bg-primary;
+}
+
+/* Smooth scroll */
+html { scroll-behavior: smooth; }
+
+/* Hide scrollbar on horizontal scroll containers */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

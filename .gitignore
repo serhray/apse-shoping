@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+apse-backend/
+
+# builds
+/dist/
+
+# env files
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# misc
+.DS_Store
+
+# local editor settings
+.vscode/
